@@ -17,6 +17,7 @@ POPRAWKI
 - Po zaktualizowaniu WPPConnect, a następnie samego programu, WPPConnect ponownie oferował tę samą aktualizację. Aktualizacja programu zachowuje teraz wersję serwera WPPConnect, którą już miałeś, jeśli jest nowsza niż ta dołączona do programu.
 - Kod zablokowanych czatów nie jest już odrzucany przy drugim OK. Przy ustawianiu lub zmianie kodu i potwierdzeniu w obu oknach program pokazywał „nieprawidłowy kod”, choć kod był już zapisany.
 - Karta Prywatność ponownie wczytuje aktualne opcje WhatsApp. W nowszych wersjach WhatsApp Web odczyt się nie udawał, a karta była pusta; teraz program odczytuje sześć opcji inną drogą. Jeśli jakaś opcja ma wartość, której karta nie potrafi wyświetlić, wiersz stanu pod opcjami podaje, która.
+- Ponowna instalacja API, proponowana przy otwarciu programu po aktualizacji, nie cofa już serwera WPPConnect. Jeśli używałeś już serwera nowszego niż dołączony do programu (na przykład 2.10.42), zostanie zainstalowany ponownie w Twojej wersji, a nie w starszej.
 
 V1.1.5.2
 

@@ -8352,6 +8352,19 @@ class MainWindow(wx.Frame):
             # ApiSetupDialog resolves the latest release itself, which is the
             # right answer when we cannot name a better one.
             minimum_tag = f"v{minimum.lstrip('vV')}"
+        if not outdated:
+            # Library-only repair: the server is not below the minimum, so
+            # reinstall the release the user already runs instead of rolling
+            # it back to the homologated one (see
+            # reinstall_tag_for_library_repair()).
+            from core.wpp_runtime import reinstall_tag_for_library_repair
+            keep_tag = reinstall_tag_for_library_repair(
+                self._get_installed_wpp_version(), minimum_tag)
+            if keep_tag != minimum_tag:
+                logging.info(
+                    "[ensure_wpp_version] Library repair keeps the installed "
+                    "server %s (homologated: %s).", keep_tag, minimum_tag or "none")
+            minimum_tag = keep_tag
         def _show_update_dlg():
             update_dlg = ApiSetupDialog(
                 self,

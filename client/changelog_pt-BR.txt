@@ -17,6 +17,7 @@ CORREÇÕES
 - Depois de atualizar o WPPConnect e, em seguida, atualizar o próprio programa, o WPPConnect voltava a oferecer a mesma atualização. A atualização do programa agora mantém a versão do servidor WPPConnect que você já tinha, quando ela é mais nova que a que vem junto com o programa.
 - O código das conversas trancadas deixa de ser rejeitado no segundo OK. Ao definir ou trocar o código e confirmar nas duas janelas, o programa mostrava "código incorreto" mesmo com o código já salvo.
 - A aba Privacidade volta a carregar as opções atuais do WhatsApp. Em versões recentes do WhatsApp Web a leitura falhava e a aba aparecia vazia; agora o programa lê as seis opções por outro caminho. Se alguma opção vier com um valor que a aba não sabe mostrar, a linha de status abaixo das opções diz qual.
+- A reinstalação da API oferecida ao abrir o programa depois de uma atualização deixa de rebaixar o servidor WPPConnect. Se você já usava um servidor mais novo do que o que acompanha o programa (por exemplo 2.10.42), ele é reinstalado na sua versão, e não na mais antiga.
 
 V1.1.5.2
 

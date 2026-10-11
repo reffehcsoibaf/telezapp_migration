@@ -59,7 +59,10 @@ import zipfile
 import requests
 import wx
 
-from app_paths import resource_path
+from app_paths import global_dir, resource_path
+from core.api_dependencies import npm_cached_metadata_is_stale, prepare_api_dependencies
+from core.api_install_timing import timed_call
+from core.npm_environment import npm_environment
 from core.wpp_runtime import homologated_wpp_tag
 
 # GitHub download URLs — no git required
@@ -891,7 +894,7 @@ class ApiSetupDialog(wx.Dialog):
         # subfolder — otherwise the browser this installer downloads and the
         # browser the server looks for are two different trees.
         puppeteer_cache = resource_path("api", ".cache")
-        npm_env  = {
+        npm_base_env = {
             **os.environ,
             "PATH": path_env,
             "PUPPETEER_CACHE_DIR": puppeteer_cache
@@ -1070,6 +1073,10 @@ class ApiSetupDialog(wx.Dialog):
 
             # ── Step 4: npm install ───────────────────────────────────────
             self._set_stage(self._i18n.t("api_setup_npm_install"), *stages["npm_install"])
+            # WinZapp's own npm cache and config, never the user's
+            # (core/npm_environment.py): the user's %LOCALAPPDATA%\\npm-cache
+            # stops growing with every update. Kept between updates so the next one reuses downloads.
+            npm_env = npm_environment(npm_base_env, global_dir("npm"), api_dir)
             # puppeteer's own postinstall script (node_modules/puppeteer/install.mjs)
             # otherwise downloads Chrome silently as part of `npm install` — a
             # multi-hundred-MB download with zero progress feedback, hidden
@@ -1081,11 +1088,20 @@ class ApiSetupDialog(wx.Dialog):
             # Skip it here; step 4.5 below downloads Chrome explicitly, with
             # its own status text, right after npm install actually finishes.
             npm_install_env = {**npm_env, "PUPPETEER_SKIP_DOWNLOAD": "true"}
-            ok, err = self._run_subprocess(
-                npm_cmd + ["install", "--no-audit", "--no-fund", "--include=optional", "--legacy-peer-deps"],
-                cwd=api_dir,
-                env=npm_install_env,
-            )
+            # Install only what this run needs (--omit=dev unless it has to
+            # compile) and prefer the cache over asking the registry for
+            # every package: the two changes that took the original
+            # project's update from ~10 to ~3 minutes.
+            dependency_flags = timed_call("dependency_manifest", prepare_api_dependencies,
+                                          api_dir, building=not modules_only)
+            install_cmd = npm_cmd + ["install", "--prefer-offline", "--no-audit", "--no-fund",
+                                     "--include=optional", "--legacy-peer-deps"] + dependency_flags
+            ok, err = self._run_subprocess(install_cmd, cwd=api_dir, env=npm_install_env)
+            if not ok and not self._cancelled and npm_cached_metadata_is_stale(err):
+                # The cached registry metadata predates a version upstream
+                # now asks for; ask the registry again instead of failing.
+                install_cmd = [arg for arg in install_cmd if arg != "--prefer-offline"] + ["--prefer-online"]
+                ok, err = self._run_subprocess(install_cmd, cwd=api_dir, env=npm_install_env)
             if not ok:
                 if not self._cancelled:
                     wx.CallAfter(self._finish_error,

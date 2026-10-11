@@ -1,3 +1,17 @@
+V2026.10.11.1
+
+This release makes the WPPConnect update faster in the dependency-installation step and now deletes the temporary files that updates used to leave behind.
+
+IMPROVEMENTS
+
+- The WPPConnect update is faster in the "Installing dependencies" step: TeleZapp now installs only what the server needs to run, without the packages used only for development, and reuses what was already downloaded instead of asking the internet for every package.
+
+- TeleZapp now uses its own installation cache, so the Windows npm-cache folder no longer grows with every update. TeleZapp's cache is kept to speed up future updates.
+
+FIXES
+
+- Updating the program, from the menu or from the update prompt, left one extra folder in %temp% every time. These temporary files are now deleted when the update finishes successfully or is canceled.
+
 V2026.10.11.0
 
 This release renames the program to TeleZapp, switches version numbers to dates (year.month.day) and makes the WPPConnect update faster.

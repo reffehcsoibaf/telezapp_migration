@@ -69,7 +69,8 @@ from core import browser_payload
 from core.database_bridge import DatabaseBridge
 from core import token_vault
 from core import chat_lock
-from app_paths import resource_path, data_path, accounts_root
+from app_paths import resource_path, data_path, accounts_root, global_dir
+from core.npm_environment import npm_environment
 from core.message_queue import MessageQueue, PendingMessage, MessageCancelled
 import wx
 import wx.adv
@@ -7837,11 +7838,11 @@ class MainWindow(wx.Frame):
             logging.info("[headless-shell] api/ not present yet — skipping.")
             return False
 
-        npm_env = {
+        npm_env = npm_environment({
             **os.environ,
             "PATH": path_env,
             "PUPPETEER_CACHE_DIR": resource_path("api", ".cache"),
-        }
+        }, global_dir("npm"), api_dir)
         creation_flags = 0
         if sys.platform == "win32" and hasattr(subprocess, "CREATE_NO_WINDOW"):
             creation_flags = subprocess.CREATE_NO_WINDOW
@@ -8072,7 +8073,8 @@ class MainWindow(wx.Frame):
                     node_dir = os.path.dirname(node_exe) if os.path.isabs(node_exe) else ""
                     path_env = (node_dir + os.pathsep + os.environ.get("PATH", "")) if node_dir else os.environ.get("PATH", "")
 
-                npm_env  = {
+                api_dir  = resource_path("api")
+                npm_env  = npm_environment({
                     **os.environ,
                     "PATH": path_env,
                     # client/api/.cache — the tree start.js searches for
@@ -8081,8 +8083,7 @@ class MainWindow(wx.Frame):
                     # this installer download into one tree while the server
                     # looks in another.
                     "PUPPETEER_CACHE_DIR": resource_path("api", ".cache"),
-                }
-                api_dir  = resource_path("api")
+                }, global_dir("npm"), api_dir)
                 creation_flags = 0
                 if sys.platform == "win32" and hasattr(subprocess, "CREATE_NO_WINDOW"):
                     creation_flags = subprocess.CREATE_NO_WINDOW

@@ -17,6 +17,7 @@ import re
 import sys
 import time
 import zipfile
+import shutil
 import tempfile
 import threading
 import logging
@@ -31,6 +32,27 @@ from core.release_signature import SIGNATURE_ASSET_NAME, check_release_manifest
 from core.wpp_runtime import homologated_wpp_tag
 from config import GITHUB_API_LATEST_RELEASE, GITHUB_API_LATEST_STABLE_RELEASE, GITHUB_REPO
 from version import __version__
+
+
+def _remove_update_temp(path) -> None:
+    """Delete a file or folder this updater left in %TEMP%. Only names the
+    updater itself creates (winzapp_upd_*, winzapp_ext_*), directly inside
+    the temp directory, are ever touched. Best-effort, never raises."""
+    try:
+        if not path:
+            return
+        path = os.path.abspath(path)
+        name = os.path.basename(path)
+        if os.path.dirname(path) != os.path.abspath(tempfile.gettempdir()):
+            return
+        if not name.startswith(("winzapp_upd_", "winzapp_ext_")):
+            return
+        if os.path.isdir(path):
+            shutil.rmtree(path, ignore_errors=True)
+        elif os.path.exists(path):
+            os.remove(path)
+    except Exception:
+        logging.debug("Auto-updater: could not remove %s", path, exc_info=True)
 
 
 def _find_named_asset(assets: list, name: str) -> str:
@@ -453,7 +475,7 @@ def _console_safe_path(path: str) -> str:
 
 def _build_installer_script(source_dir: str, install_dir: str, exe_path: str,
                             log_path: str, marker_path: str, pid: int,
-                            api_port: int) -> str:
+                            api_port: int, cleanup_dir: "str | None" = None) -> str:
     """The batch script text. Pure — every path is already console-safe.
 
     Kept apart from _run_batch_installer() so what the script says can be
@@ -528,7 +550,9 @@ def _build_installer_script(source_dir: str, install_dir: str, exe_path: str,
         ")\n"
         f'>> "{log_path}" echo xcopy OK\n'
         f'if exist "{exe_path}" start "" "{exe_path}"\n'
-        'del "%~f0"\n'
+        # Only on success: on failure the extracted files stay with the log.
+        + (f'rmdir /s /q "{cleanup_dir}" >NUL 2>&1\n' if cleanup_dir else "")
+        + 'del "%~f0"\n'
     )
 
 
@@ -585,7 +609,8 @@ def _keep_newer_installed_server(source_dir: str, install_dir: str) -> None:
         logging.exception("Auto-updater: could not check the installed WPPConnect Server")
 
 
-def _run_batch_installer(extracted_dir: str, install_dir: str, exe_name: str, pid: int, api_port: int = 6300) -> bool:
+def _run_batch_installer(extracted_dir: str, install_dir: str, exe_name: str, pid: int, api_port: int = 6300,
+                         cleanup_dir: "str | None" = None) -> bool:
     """
     Write a batch script that:
       1. Waits for PID to exit.
@@ -644,6 +669,7 @@ def _run_batch_installer(extracted_dir: str, install_dir: str, exe_name: str, pi
         os.path.join(safe_install, "update_failed.marker"),
         pid,
         api_port,
+        cleanup_dir=_console_safe_path(cleanup_dir) if cleanup_dir else None,
     )
     if not _write_installer_script(bat_path, script):
         return False
@@ -798,6 +824,9 @@ class UpdateProgressDialog(wx.Dialog):
 
     def _worker(self):
         """Download, extract, and launch installer — all in a background thread."""
+        installer_handed_off = False
+        zip_path = None
+        ext_root = None
         try:
             # ── Download ──────────────────────────────────────────────────────
             zip_fd, zip_path = tempfile.mkstemp(suffix=".zip", prefix="winzapp_upd_")
@@ -850,6 +879,7 @@ class UpdateProgressDialog(wx.Dialog):
 
             # ── Extract ───────────────────────────────────────────────────────
             extract_dir = tempfile.mkdtemp(prefix="winzapp_ext_")
+            ext_root = extract_dir
             logging.info("Auto-updater: Extracting update to %s", extract_dir)
             with zipfile.ZipFile(zip_path, "r") as zf:
                 _safe_extract_zip(zf, extract_dir)
@@ -895,18 +925,27 @@ class UpdateProgressDialog(wx.Dialog):
             pid         = os.getpid()
 
             logging.info("Auto-updater: Launching batch installer from %s (PID %d)", install_dir, pid)
-            launched = _run_batch_installer(extract_dir, install_dir, exe_name, pid, api_port=getattr(self._main_window, "wpp_port", 6300))
+            launched = _run_batch_installer(extract_dir, install_dir, exe_name, pid, api_port=getattr(self._main_window, "wpp_port", 6300),
+                                            cleanup_dir=ext_root)
             if not launched:
                 self._error_msg = self._main_window.i18n.t("update_uac_declined")
                 wx.CallAfter(self.EndModal, wx.ID_ABORT)
                 return
             self._install_ok = True
+            installer_handed_off = True
             wx.CallAfter(self.EndModal, wx.ID_OK)
 
         except Exception as exc:
             logging.exception("Auto-updater: Exception during update installation")
             self._error_msg = str(exc)
             wx.CallAfter(self.EndModal, wx.ID_ABORT)
+        finally:
+            # Handed off: the batch script removes the extraction itself once
+            # it has copied it. Anything else (cancel, error, dev run) is
+            # cleaned here, so %TEMP% stops filling up with winzapp_* leftovers.
+            if not installer_handed_off:
+                _remove_update_temp(zip_path)
+                _remove_update_temp(ext_root)
 
 
 # ── UpdateDialog ──────────────────────────────────────────────────────────────

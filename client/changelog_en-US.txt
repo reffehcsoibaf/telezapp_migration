@@ -1,3 +1,24 @@
+V2026.10.11.0
+
+This release renames the program to TeleZapp, switches version numbers to dates (year.month.day) and makes the WPPConnect update faster.
+
+WHAT'S NEW
+
+- WinZapp is now called TeleZapp, to set it apart from the original project, whose good ideas we keep picking up (and to which we also contribute improvements). The update arrives through the usual updater: if you already use WinZapp you get TeleZapp without downloading anything by hand, and your accounts, conversations and settings stay exactly as they are.
+- Versions are now numbered by date, in the year.month.day format. This is version 2026.10.11.0 (the last number only changes when there is more than one release on the same day).
+
+IMPROVEMENTS
+
+- Updating WPPConnect is faster: the internal browser (Chrome) that was already downloaded is now kept between updates instead of being downloaded in full every time. If the existing browser is incomplete it is discarded and downloaded again, and old versions are removed after the update so they don't take up space.
+- The WPPConnect server moves to version 2.3.4 and wa-js to the official 4.6.1 release, which already includes the fixes for the Privacy and profile Name tabs. Installing the server no longer builds wa-js on your computer, which saves a few minutes. The first time you open this version, the program offers an API reinstall to swap those libraries.
+
+FIXES
+
+- After updating WPPConnect and then updating the program itself, WPPConnect would offer the same update again. Updating the program now keeps the WPPConnect server version you already had when it is newer than the one bundled with the program.
+- The locked-chats code is no longer rejected on the second OK. When setting or changing the code and confirming in both windows, the program showed "incorrect code" even though the code had already been saved.
+- The Privacy tab loads the current WhatsApp options again. On recent WhatsApp Web versions the read failed and the tab came up empty; the program now reads the six options another way. If an option arrives with a value the tab cannot display, the status line below the options says which.
+- The API reinstall offered when opening the program after an update no longer rolls the WPPConnect server back. If you were already running a server newer than the one bundled with the program (for example 2.10.42), it is reinstalled at your version, not the older one.
+
 V1.1.5.2
 
 This release postpones the automatic update check until WinZapp has been running for a while.

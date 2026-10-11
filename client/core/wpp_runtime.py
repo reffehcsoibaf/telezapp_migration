@@ -47,6 +47,42 @@ def homologated_wpp_tag(path: str) -> str:
     return f"v{version.lstrip('vV')}" if version else ""
 
 
+def _release_tuple(version):
+    """(2, 10, 42) for a plain numeric release like "2.10.42" or "v2.10.42";
+    None for anything else (empty, pre-release suffixes, text)."""
+    import re
+    text = str(version or "").strip().lstrip("vV")
+    if not re.fullmatch(r"\d+(?:\.\d+){1,3}", text):
+        return None
+    return tuple(int(part) for part in text.split("."))
+
+
+def reinstall_tag_for_library_repair(installed_server_version, homologated_tag: str) -> str:
+    """The server release to reinstall when ONLY the library drifted.
+
+    The startup gate offers a reinstall for two different reasons: the server
+    itself is older than the homologated minimum (then the homologated tag is
+    exactly what is needed), or the server is fine but node_modules holds a
+    different wppconnect/wa-js than api/package.json pins. In the second case
+    the reinstall only has to bring the libraries to the pin, and it used to
+    install the homologated tag anyway, which silently downgraded anyone whose
+    server was newer (an in-app WPPConnect update past the homologated release)
+    and then made the update checker offer the same update again.
+
+    Keeps the user's release (as a tag, "v2.10.42") when it is a plain numeric
+    release not below the homologated one. Otherwise returns the homologated
+    tag unchanged, which may be "" (no tag pinned: ApiSetupDialog then resolves
+    the latest release itself).
+    """
+    installed = _release_tuple(installed_server_version)
+    if installed is None:
+        return homologated_tag
+    homologated = _release_tuple(homologated_tag)
+    if homologated is not None and installed < homologated:
+        return homologated_tag
+    return "v" + ".".join(str(part) for part in installed)
+
+
 #: The npm package whose compiled output WinZapp patches in place (see
 #: core/wppconnect_*_patch.py). Its version is pinned exactly by
 #: api/package.json, and the patches are search-and-replace against that exact

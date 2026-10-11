@@ -15,6 +15,8 @@ MEJORAS
 CORRECCIONES
 
 - Después de actualizar WPPConnect y luego el propio programa, WPPConnect volvía a ofrecer la misma actualización. Ahora la actualización del programa conserva la versión del servidor WPPConnect que ya tenías, cuando es más nueva que la que viene con el programa.
+- El código de los chats bloqueados deja de rechazarse en el segundo OK. Al definir o cambiar el código y confirmar en las dos ventanas, el programa mostraba "código incorrecto" aunque el código ya estuviera guardado.
+- La pestaña Privacidad vuelve a cargar las opciones actuales de WhatsApp. En versiones recientes de WhatsApp Web la lectura fallaba y la pestaña aparecía vacía; ahora el programa lee las seis opciones por otro camino. Si alguna opción llega con un valor que la pestaña no sabe mostrar, la línea de estado bajo las opciones indica cuál.
 
 V1.1.5.2
 

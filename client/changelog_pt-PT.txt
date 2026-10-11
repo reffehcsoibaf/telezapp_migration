@@ -15,6 +15,8 @@ MELHORIAS
 CORREÇÕES
 
 - Depois de atualizar o WPPConnect e, em seguida, o próprio programa, o WPPConnect voltava a oferecer a mesma atualização. A atualização do programa passa a manter a versão do servidor WPPConnect que já tinha, quando é mais recente do que a que vem com o programa.
+- O código das conversas trancadas deixa de ser rejeitado no segundo OK. Ao definir ou alterar o código e confirmar nas duas janelas, o programa mostrava "código incorreto" mesmo com o código já guardado.
+- O separador Privacidade volta a carregar as opções atuais do WhatsApp. Em versões recentes do WhatsApp Web a leitura falhava e o separador aparecia vazio; agora o programa lê as seis opções por outro caminho. Se alguma opção vier com um valor que o separador não sabe mostrar, a linha de estado abaixo das opções diz qual.
 
 V1.1.5.2
 

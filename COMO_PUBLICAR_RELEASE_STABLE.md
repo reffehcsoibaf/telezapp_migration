@@ -72,7 +72,7 @@ git push origin main
 
 ## Mudança de repositório (WinZapp → TeleZapp)
 
-A versão que passa a apontar as atualizações para `reffehcsoibaf/telezapp`
+A versão que passa a apontar as atualizações para `reffehcsoibaf/telezapp_migration`
 (`client/branding.py`, `GITHUB_REPO_DEFAULT`) segue uma ordem própria, porque
 quem já está instalado só consulta o repositório **antigo**:
 

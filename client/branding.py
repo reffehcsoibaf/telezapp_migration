@@ -30,7 +30,10 @@ LEGACY_SHORTCUT_FILENAME = f"{LEGACY_APP_NAME}.lnk"
 # fork. Installed copies that predate this still ask the old repository, which
 # is why the build that first carries this value is published THERE; every
 # copy that installs it then asks the new one.
-GITHUB_REPO_DEFAULT = "reffehcsoibaf/telezapp"
+# NOT ``reffehcsoibaf/telezapp``: that repository is reserved for the TeleZapp
+# being rebuilt from scratch (a different app). Pointing this client at it would
+# offer that app as an "update" to every copy of this one.
+GITHUB_REPO_DEFAULT = "reffehcsoibaf/telezapp_migration"
 LEGACY_GITHUB_REPO = "reffehcsoibaf/winzapp"
 
 

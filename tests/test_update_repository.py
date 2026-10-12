@@ -25,8 +25,14 @@ def reload_config(monkeypatch):
 
 def test_default_is_the_projects_own_repository(reload_config):
     cfg = reload_config()
-    assert cfg.GITHUB_REPO == branding.GITHUB_REPO_DEFAULT == "reffehcsoibaf/telezapp"
+    assert cfg.GITHUB_REPO == branding.GITHUB_REPO_DEFAULT == "reffehcsoibaf/telezapp_migration"
     assert cfg.GITHUB_REPO != branding.LEGACY_GITHUB_REPO
+
+
+def test_default_never_points_at_the_from_scratch_app_repository(reload_config):
+    # reffehcsoibaf/telezapp holds the rewritten app; offering it as an update
+    # to this client would replace one app with a different one.
+    assert reload_config().GITHUB_REPO != "reffehcsoibaf/telezapp"
 
 
 def test_old_env_var_still_overrides(reload_config):
@@ -41,5 +47,5 @@ def test_new_env_var_wins_over_the_old_one(reload_config):
 def test_release_urls_follow_the_repository(reload_config):
     cfg = reload_config()
     assert cfg.GITHUB_API_LATEST_RELEASE == (
-        "https://api.github.com/repos/reffehcsoibaf/telezapp/releases")
+        "https://api.github.com/repos/reffehcsoibaf/telezapp_migration/releases")
     assert cfg.GITHUB_API_LATEST_STABLE_RELEASE.startswith(cfg.GITHUB_API_LATEST_RELEASE)

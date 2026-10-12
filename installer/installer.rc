@@ -5,7 +5,7 @@ CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "installer.manifest"
 
 IDD_INSTALL DIALOGEX 0, 0, 310, 145
 STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Instalador do WinZapp"
+CAPTION "Instalador do TeleZapp"
 FONT 9, "Segoe UI"
 BEGIN
     LTEXT           "Pasta de instalação:", IDC_PATH_LABEL, 7, 7, 120, 9

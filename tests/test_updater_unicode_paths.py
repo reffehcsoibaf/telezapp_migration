@@ -139,7 +139,7 @@ class TestInstallerScript:
         first means at least the run before the current one survives."""
         s = _script()
         move_idx = s.index('move /Y "C:\\WinZapp\\update_install.log" "C:\\WinZapp\\update_install.log.old"')
-        truncate_idx = s.index('> "C:\\WinZapp\\update_install.log" echo [WinZapp] update started')
+        truncate_idx = s.index('> "C:\\WinZapp\\update_install.log" echo [TeleZapp] update started')
         assert move_idx < truncate_idx, "must move the old log aside BEFORE truncating the current one"
         # Best-effort: a missing/locked file from the very first update ever
         # must not fail the script.

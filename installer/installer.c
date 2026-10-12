@@ -133,7 +133,7 @@ typedef struct {
 } UiStrings;
 
 static const UiStrings STR_PT = {
-    L"Instalador do WinZapp",
+    L"Instalador do TeleZapp",
     L"Pasta de instalação:",
     L"Procurar...",
     L"Criar atalho na área de trabalho",
@@ -143,14 +143,14 @@ static const UiStrings STR_PT = {
     L"Selecione a pasta de instalação",
     L"Por favor, selecione uma pasta de instalação.",
     L"Extração falhou.",
-    L"WinZapp foi instalado com sucesso!",
+    L"TeleZapp foi instalado com sucesso!",
     L"Instalação concluída",
     L"Ocorreu um erro durante a instalação:\n%s",
     L"Erro de instalação",
 };
 
 static const UiStrings STR_ES = {
-    L"Instalador de WinZapp",
+    L"Instalador de TeleZapp",
     L"Carpeta de instalación:",
     L"Examinar...",
     L"Crear acceso directo en el escritorio",
@@ -160,14 +160,14 @@ static const UiStrings STR_ES = {
     L"Seleccione la carpeta de instalación",
     L"Por favor, seleccione una carpeta de instalación.",
     L"La extracción falló.",
-    L"¡WinZapp se instaló correctamente!",
+    L"¡TeleZapp se instaló correctamente!",
     L"Instalación completada",
     L"Se produjo un error durante la instalación:\n%s",
     L"Error de instalación",
 };
 
 static const UiStrings STR_EN = {
-    L"WinZapp Installer",
+    L"TeleZapp Installer",
     L"Installation folder:",
     L"Browse...",
     L"Create desktop shortcut",
@@ -177,7 +177,7 @@ static const UiStrings STR_EN = {
     L"Select the installation folder",
     L"Please select an installation folder.",
     L"Extraction failed.",
-    L"WinZapp was installed successfully!",
+    L"TeleZapp was installed successfully!",
     L"Installation complete",
     L"An error occurred during installation:\n%s",
     L"Installation error",
@@ -202,6 +202,11 @@ static void select_language(void)
 
 /* ── Globals ──────────────────────────────────────────────────────────── */
 
+/* The uninstall key keeps its historical name (WinZapp): uninstall.exe and
+ * every copy installed before the rename look it up by that name. */
+#define REGKEY_UNINSTALL \
+    L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\WinZapp"
+
 static HWND  g_hDlg      = NULL;
 static BOOL  g_cancelled = FALSE;
 
@@ -209,6 +214,7 @@ typedef struct {
     wchar_t  install_dir[MAX_PATH];
     BOOL     desktop_sc;
     BOOL     startmenu_sc;
+    BOOL     reinstall;     /* install_dir is where an existing copy already lives */
 } InstallParams;
 
 /* ── ZIP helpers ──────────────────────────────────────────────────────── */
@@ -527,10 +533,9 @@ static void register_uninstall(const wchar_t *install_dir,
                                 const wchar_t *uninstall_exe)
 {
     HKEY hkey;
-    const wchar_t *key_path =
-        L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\WinZapp";
+    const wchar_t *key_path = REGKEY_UNINSTALL;
 
-    /* The default install location (%LOCALAPPDATA%\WinZapp) needs no
+    /* The default install location (%LOCALAPPDATA%\TeleZapp) needs no
      * elevation, so this process is usually NOT admin — writing straight to
      * HKEY_LOCAL_MACHINE then fails with ERROR_ACCESS_DENIED and silently
      * skips the whole uninstall registration, leaving the app installed with
@@ -550,7 +555,7 @@ static void register_uninstall(const wchar_t *install_dir,
         return;
 
     RegSetValueExW(hkey, L"DisplayName", 0, REG_SZ,
-                   (BYTE *)L"WinZapp", sizeof(L"WinZapp"));
+                   (BYTE *)L"TeleZapp", sizeof(L"TeleZapp"));
     RegSetValueExW(hkey, L"UninstallString", 0, REG_SZ,
                    (BYTE *)uninstall_exe,
                    (DWORD)((wcslen(uninstall_exe) + 1) * sizeof(wchar_t)));
@@ -560,7 +565,7 @@ static void register_uninstall(const wchar_t *install_dir,
     RegSetValueExW(hkey, L"DisplayVersion", 0, REG_SZ,
                    (BYTE *)WINZAPP_VERSION, (DWORD)sizeof(WINZAPP_VERSION));
     RegSetValueExW(hkey, L"Publisher", 0, REG_SZ,
-                   (BYTE *)L"WinZapp", sizeof(L"WinZapp"));
+                   (BYTE *)L"TeleZapp", sizeof(L"TeleZapp"));
     DWORD one = 1;
     RegSetValueExW(hkey, L"NoModify", 0, REG_DWORD, (BYTE *)&one, sizeof(DWORD));
     RegSetValueExW(hkey, L"NoRepair", 0, REG_DWORD, (BYTE *)&one, sizeof(DWORD));
@@ -592,6 +597,45 @@ static void write_file_list(const wchar_t *install_dir,
     CloseHandle(hf);
 }
 
+/* ── Existing installation ────────────────────────────────────────────── */
+
+/* Folder of the copy that is already installed (machine-wide hive first, then
+ * the per-user one — the same order uninstall.exe uses), or FALSE when there
+ * is none or its folder is gone. Offering that folder as the default keeps an
+ * installer run over an existing WinZapp install from creating a second,
+ * parallel copy next to it under the new TeleZapp folder name. */
+static BOOL registered_install_dir(wchar_t *out, DWORD char_count)
+{
+    const HKEY hives[] = { HKEY_LOCAL_MACHINE, HKEY_CURRENT_USER };
+    for (int i = 0; i < 2; i++) {
+        HKEY hkey;
+        if (RegOpenKeyExW(hives[i], REGKEY_UNINSTALL, 0,
+                          KEY_READ, &hkey) != ERROR_SUCCESS)
+            continue;
+        DWORD type  = REG_SZ;
+        DWORD bytes = (char_count - 1) * sizeof(wchar_t);
+        LONG  r = RegQueryValueExW(hkey, L"InstallLocation", NULL, &type,
+                                   (BYTE *)out, &bytes);
+        RegCloseKey(hkey);
+        if (r != ERROR_SUCCESS || type != REG_SZ)
+            continue;
+        out[bytes / sizeof(wchar_t)] = L'\0';
+        DWORD attrs = GetFileAttributesW(out);
+        if (attrs != INVALID_FILE_ATTRIBUTES && (attrs & FILE_ATTRIBUTE_DIRECTORY))
+            return TRUE;
+    }
+    return FALSE;
+}
+
+/* Case-insensitive folder comparison that ignores trailing backslashes. */
+static BOOL same_folder(const wchar_t *a, const wchar_t *b)
+{
+    size_t la = wcslen(a), lb = wcslen(b);
+    while (la > 0 && (a[la - 1] == L'\\' || a[la - 1] == L'/')) la--;
+    while (lb > 0 && (b[lb - 1] == L'\\' || b[lb - 1] == L'/')) lb--;
+    return la == lb && la > 0 && _wcsnicmp(a, b, la) == 0;
+}
+
 /* ── Install thread ───────────────────────────────────────────────────── */
 
 static DWORD WINAPI install_thread(LPVOID param)
@@ -620,18 +664,30 @@ static DWORD WINAPI install_thread(LPVOID param)
     wchar_t exe_path[MAX_PATH];
     swprintf(exe_path, MAX_PATH, L"%s\\WinZapp.exe", p->install_dir);
 
+    /* Shortcuts are named TeleZapp.lnk; the target stays WinZapp.exe (the
+     * executable keeps its historical name, see client/branding.py). A
+     * WinZapp.lnk left by a previous install of THIS folder is removed so the
+     * user does not end up with two. */
     if (p->desktop_sc) {
         wchar_t desktop[MAX_PATH], link[MAX_PATH];
         SHGetFolderPathW(NULL, CSIDL_DESKTOPDIRECTORY, NULL, 0, desktop);
-        swprintf(link, MAX_PATH, L"%s\\WinZapp.lnk", desktop);
+        swprintf(link, MAX_PATH, L"%s\\TeleZapp.lnk", desktop);
         create_shortcut(exe_path, link, p->install_dir);
+        if (p->reinstall) {
+            swprintf(link, MAX_PATH, L"%s\\WinZapp.lnk", desktop);
+            DeleteFileW(link);
+        }
     }
 
     if (p->startmenu_sc) {
         wchar_t programs[MAX_PATH], link[MAX_PATH];
         SHGetFolderPathW(NULL, CSIDL_COMMON_PROGRAMS, NULL, 0, programs);
-        swprintf(link, MAX_PATH, L"%s\\WinZapp.lnk", programs);
+        swprintf(link, MAX_PATH, L"%s\\TeleZapp.lnk", programs);
         create_shortcut(exe_path, link, p->install_dir);
+        if (p->reinstall) {
+            swprintf(link, MAX_PATH, L"%s\\WinZapp.lnk", programs);
+            DeleteFileW(link);
+        }
     }
 
     wchar_t uninstall_exe[MAX_PATH];
@@ -665,10 +721,14 @@ static INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
         SetDlgItemTextW(hDlg, IDC_INSTALL,      g_str->install);
         SetDlgItemTextW(hDlg, IDC_CANCEL,       g_str->cancel);
 
+        wchar_t existing[MAX_PATH];
         wchar_t local_app[MAX_PATH];
-        if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, local_app))) {
+        if (registered_install_dir(existing, MAX_PATH)) {
+            /* Already installed (possibly as WinZapp): offer that folder. */
+            SetDlgItemTextW(hDlg, IDC_INSTALL_PATH, existing);
+        } else if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_LOCAL_APPDATA, NULL, 0, local_app))) {
             wchar_t def_path[MAX_PATH];
-            swprintf(def_path, MAX_PATH, L"%s\\WinZapp", local_app);
+            swprintf(def_path, MAX_PATH, L"%s\\TeleZapp", local_app);
             SetDlgItemTextW(hDlg, IDC_INSTALL_PATH, def_path);
         }
 
@@ -701,7 +761,7 @@ static INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
             GetDlgItemTextW(hDlg, IDC_INSTALL_PATH, install_dir, MAX_PATH);
             if (!install_dir[0]) {
                 MessageBoxW(hDlg, g_str->err_no_folder,
-                            L"WinZapp", MB_OK | MB_ICONWARNING);
+                            L"TeleZapp", MB_OK | MB_ICONWARNING);
                 return TRUE;
             }
 
@@ -714,6 +774,11 @@ static INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
             params->install_dir[MAX_PATH - 1] = L'\0';
             params->desktop_sc   = IsDlgButtonChecked(hDlg, IDC_DESKTOP_SC)   == BST_CHECKED;
             params->startmenu_sc = IsDlgButtonChecked(hDlg, IDC_STARTMENU_SC) == BST_CHECKED;
+            {
+                wchar_t existing[MAX_PATH];
+                params->reinstall = registered_install_dir(existing, MAX_PATH)
+                                    && same_folder(existing, install_dir);
+            }
 
             HANDLE hThread = CreateThread(NULL, 0, install_thread, params, 0, NULL);
             if (hThread) CloseHandle(hThread);

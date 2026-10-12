@@ -93,7 +93,7 @@ def fetch_latest_wpp_tag(timeout: float = 15) -> str:
     try:
         resp = requests.get(
             WPP_GITHUB_API_LATEST_RELEASE,
-            headers={"User-Agent": "WinZapp"},
+            headers={"User-Agent": "TeleZapp"},
             timeout=timeout,
         )
         resp.raise_for_status()

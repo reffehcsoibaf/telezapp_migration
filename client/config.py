@@ -32,9 +32,17 @@ def _load_dotenv():
 _load_dotenv()
 
 # ── Update source: GitHub Releases ───────────────────────────────────────────
-# Override WINZAPP_GITHUB_REPO in .env to point at a fork.
+# Override TELEZAPP_GITHUB_REPO (or the older WINZAPP_GITHUB_REPO, still read so
+# an existing .env keeps working) in .env to point at a fork. The default is the
+# project's own repository; see branding.GITHUB_REPO_DEFAULT.
 
-GITHUB_REPO = os.environ.get("WINZAPP_GITHUB_REPO", "reffehcsoibaf/winzapp")
+from branding import GITHUB_REPO_DEFAULT
+
+GITHUB_REPO = (
+    os.environ.get("TELEZAPP_GITHUB_REPO")
+    or os.environ.get("WINZAPP_GITHUB_REPO")
+    or GITHUB_REPO_DEFAULT
+)
 
 # The releases LISTING (despite the historical name). Newest-first, paginated —
 # it returns 30 entries unless per_page says otherwise, and it includes

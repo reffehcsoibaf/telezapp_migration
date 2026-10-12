@@ -2,7 +2,10 @@
 Windows autostart-registry helpers and single-instance management for WinZapp.
 
 Registry key used for autostart:
-    HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run  →  "WinZapp"
+    HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run  →  "TeleZapp"
+    (copies installed before the rename used the value name "WinZapp"; it is
+    still recognised and is replaced by the new name the next time autostart
+    is written — see ``_legacy_value_is_ours``)
 
 Single-instance mutex:
     Named mutex "Global\\WinZappSingleInstance" is acquired in the first
@@ -13,10 +16,11 @@ import os
 import sys
 import hashlib
 from app_paths import data_path
-from branding import is_app_window_title
+from branding import APP_NAME, LEGACY_APP_NAME, is_app_window_title
 
 _AUTORUN_KEY  = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
-_AUTORUN_NAME = "WinZapp"
+_AUTORUN_NAME = APP_NAME
+_LEGACY_AUTORUN_NAME = LEGACY_APP_NAME
 
 def _get_dynamic_mutex_name() -> str:
     try:
@@ -36,7 +40,7 @@ def get_autostart_command() -> str:
     """
     Return the command that should be stored in the Run registry value.
 
-    * Compiled (Nuitka/PyInstaller): ``"WinZapp.exe" --background``
+    * Compiled (Nuitka/PyInstaller): ``"<install dir>\\WinZapp.exe" --background``
     * Development:                   ``"python.exe" "main.py" --background``
     """
     argv0 = os.path.abspath(sys.argv[0])
@@ -51,23 +55,50 @@ def get_autostart_command() -> str:
 
 # ── Registry helpers ──────────────────────────────────────────────────────────
 
-def is_autostart_enabled() -> bool:
-    """Return True if a WinZapp entry exists in the current-user Run key."""
-    import winreg
+def _legacy_value_is_ours(command: str) -> bool:
+    """Whether a legacy "WinZapp" Run value launches THIS installation.
+
+    A machine can also run the original WinZapp, which owns a value with the
+    same name; that one must be left alone.
+    """
+    try:
+        ours = os.path.normcase(os.path.abspath(sys.argv[0]))
+        return ours != "" and ours in os.path.normcase(command or "")
+    except Exception:
+        return False
+
+
+def _query(winreg, name):
     try:
         key = winreg.OpenKey(
             winreg.HKEY_CURRENT_USER, _AUTORUN_KEY, 0, winreg.KEY_READ
         )
-        winreg.QueryValueEx(key, _AUTORUN_NAME)
-        winreg.CloseKey(key)
-        return True
     except OSError:
-        return False
+        return None
+    try:
+        return winreg.QueryValueEx(key, name)[0]
+    except OSError:
+        return None
+    finally:
+        winreg.CloseKey(key)
+
+
+def is_autostart_enabled() -> bool:
+    """Return True if this app has an entry in the current-user Run key.
+
+    The new value name counts, and so does the legacy "WinZapp" one when it
+    launches this installation (an update in place never rewrote it).
+    """
+    import winreg
+    if _query(winreg, _AUTORUN_NAME) is not None:
+        return True
+    legacy = _query(winreg, _LEGACY_AUTORUN_NAME)
+    return legacy is not None and _legacy_value_is_ours(legacy)
 
 
 def enable_autostart() -> None:
     """
-    Write the WinZapp Run registry value.
+    Write the TeleZapp Run registry value (and retire this install's legacy one).
 
     Raises ``OSError`` (or a subclass) if the key cannot be written — the
     caller is responsible for showing a user-facing error message.
@@ -77,21 +108,54 @@ def enable_autostart() -> None:
     key = winreg.OpenKey(
         winreg.HKEY_CURRENT_USER, _AUTORUN_KEY, 0, winreg.KEY_SET_VALUE
     )
-    winreg.SetValueEx(key, _AUTORUN_NAME, 0, winreg.REG_SZ, cmd)
-    winreg.CloseKey(key)
+    try:
+        winreg.SetValueEx(key, _AUTORUN_NAME, 0, winreg.REG_SZ, cmd)
+        # Only after the new value is in place, and only if the old one is ours.
+        legacy = _query(winreg, _LEGACY_AUTORUN_NAME)
+        if legacy is not None and _legacy_value_is_ours(legacy):
+            try:
+                winreg.DeleteValue(key, _LEGACY_AUTORUN_NAME)
+            except OSError:
+                pass
+    finally:
+        winreg.CloseKey(key)
+
+
+def migrate_autostart() -> bool:
+    """Switch an existing legacy entry to the new name, keeping autostart on.
+
+    Returns True when something was rewritten. Safe to call on every start.
+    """
+    import winreg
+    legacy = _query(winreg, _LEGACY_AUTORUN_NAME)
+    if legacy is None or not _legacy_value_is_ours(legacy):
+        return False
+    enable_autostart()
+    return True
 
 
 def disable_autostart() -> None:
-    """Remove the WinZapp Run registry value (silently ignores missing entries)."""
+    """Remove this app's Run registry value (silently ignores missing entries)."""
     import winreg
     try:
         key = winreg.OpenKey(
             winreg.HKEY_CURRENT_USER, _AUTORUN_KEY, 0, winreg.KEY_SET_VALUE
         )
-        winreg.DeleteValue(key, _AUTORUN_NAME)
-        winreg.CloseKey(key)
     except OSError:
-        pass
+        return
+    try:
+        try:
+            winreg.DeleteValue(key, _AUTORUN_NAME)
+        except OSError:
+            pass
+        legacy = _query(winreg, _LEGACY_AUTORUN_NAME)
+        if legacy is not None and _legacy_value_is_ours(legacy):
+            try:
+                winreg.DeleteValue(key, _LEGACY_AUTORUN_NAME)
+            except OSError:
+                pass
+    finally:
+        winreg.CloseKey(key)
 
 
 # ── Single-instance helpers ───────────────────────────────────────────────────

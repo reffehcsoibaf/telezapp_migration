@@ -370,7 +370,7 @@ def fetch_release_changelog(tag: str, lang_code: str, get_text=None) -> str:
     from urllib.parse import quote
     if get_text is None:
         def get_text(url):
-            resp = requests.get(url, headers={"User-Agent": f"WinZapp/{__version__}"}, timeout=15)
+            resp = requests.get(url, headers={"User-Agent": f"TeleZapp/{__version__}"}, timeout=15)
             resp.raise_for_status()
             resp.encoding = "utf-8"
             return resp.text
@@ -493,7 +493,7 @@ def _build_installer_script(source_dir: str, install_dir: str, exe_path: str,
         # not — so move it aside first (best-effort; a locked/missing file
         # from the very first update ever just does nothing here).
         f'move /Y "{log_path}" "{log_path}.old" >NUL 2>&1\n'
-        f'> "{log_path}" echo [WinZapp] update started %DATE% %TIME%\n'
+        f'> "{log_path}" echo [TeleZapp] update started %DATE% %TIME%\n'
         # The active code page goes into the log first: when a path does come
         # out wrong, this is the single fact that explains it, and the old
         # script left no record of anything at all.
@@ -1099,7 +1099,7 @@ class UpdateChecker:
     def _get_json(self, url: str, params: "dict | None" = None):
         resp = requests.get(
             url,
-            headers={"User-Agent": f"WinZapp/{__version__}"},
+            headers={"User-Agent": f"TeleZapp/{__version__}"},
             params=params,
             timeout=15,
         )

@@ -20,6 +20,19 @@ APP_NAME = "TeleZapp"
 LEGACY_APP_NAME = "WinZapp"
 APP_NAMES = (APP_NAME, LEGACY_APP_NAME)
 
+# Names of the shortcuts the installer drops on the Desktop / Start menu. A copy
+# that was installed (or updated in place) before the rename still carries the
+# legacy name; install_migration.py renames it on the first run of a new build.
+SHORTCUT_FILENAME = f"{APP_NAME}.lnk"
+LEGACY_SHORTCUT_FILENAME = f"{LEGACY_APP_NAME}.lnk"
+
+# Update source. The repository is the project's own, no longer the WinZapp
+# fork. Installed copies that predate this still ask the old repository, which
+# is why the build that first carries this value is published THERE; every
+# copy that installs it then asks the new one.
+GITHUB_REPO_DEFAULT = "reffehcsoibaf/telezapp"
+LEGACY_GITHUB_REPO = "reffehcsoibaf/winzapp"
+
 
 def is_default_account_name(name) -> bool:
     """True for "no custom account name": unset, or either spelling of the app."""

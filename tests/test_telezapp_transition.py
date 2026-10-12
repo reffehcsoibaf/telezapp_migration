@@ -93,5 +93,13 @@ def test_technical_names_old_installs_depend_on_are_unchanged():
     # What the properties dialog shows is the new name.
     assert "StringStruct('ProductName', 'TeleZapp')" in build
     # Windows identities that would orphan settings or allow two instances if renamed.
-    assert '_AUTORUN_NAME = "WinZapp"' in _read("client", "autostart.py")
+    # Autostart: the Run value now carries the new name, and the old one is still
+    # recognised and moved (autostart.migrate_autostart), so nobody loses it.
+    autostart = _read("client", "autostart.py")
+    assert "_AUTORUN_NAME = APP_NAME" in autostart
+    assert "_LEGACY_AUTORUN_NAME = LEGACY_APP_NAME" in autostart
+    assert 'LEGACY_APP_NAME = "WinZapp"' in _read("client", "branding.py")
+    # The uninstall key keeps its historical name: uninstall.exe finds it by that.
+    assert "Uninstall\\\\WinZapp" in _read("installer", "installer.c")
+    assert "Uninstall\\\\WinZapp" in _read("installer", "uninstaller.c")
     assert 'APP_ID    = "WinZapp"' in _read("client", "core", "notification_manager.py")

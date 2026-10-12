@@ -1865,6 +1865,10 @@ class MainWindow(wx.Frame):
 
         # Synchronize registry key with the autostart setting on Windows
         self._sync_autostart_registry()
+        # An install made (or updated in place) under the old WinZapp name keeps
+        # the old shortcut / autostart / installed-apps names; bring them to
+        # TeleZapp. Off the UI thread, never blocks or breaks startup.
+        self._start_legacy_install_migration()
 
 
 
@@ -8184,7 +8188,7 @@ class MainWindow(wx.Frame):
         carries the exact same one value without needing a whole
         key=value config file format, or the general dotenv-override
         mechanism (config.py's own _load_dotenv(), which still lets a user
-        manually drop a real .env next to the exe for WINZAPP_GITHUB_REPO —
+        manually drop a real .env next to the exe for TELEZAPP_GITHUB_REPO —
         that stays; it's just never build-injected any more).
         """
         return read_homologated_wpp_version(resource_path("wpp_minimum_version.txt"))
@@ -10915,6 +10919,33 @@ class MainWindow(wx.Frame):
             disable_autostart()
             self.settings.setdefault("general", {})["autostart"] = False
             self.save_settings()
+
+    def _start_legacy_install_migration(self):
+        """Rename the old WinZapp shortcuts / autostart / installed-apps entry.
+
+        Only for a compiled copy on Windows: a source run has no shortcuts of
+        its own to rename. Each step only touches what belongs to this very
+        installation (see install_migration.py).
+        """
+        import sys
+        if sys.platform != "win32" or not getattr(sys, "frozen", False):
+            return
+
+        def _work():
+            try:
+                import install_migration
+                from autostart import migrate_autostart
+                try:
+                    if migrate_autostart():
+                        logging.info("Startup: autostart entry moved to the TeleZapp name")
+                except Exception:
+                    logging.exception("Startup: autostart migration failed")
+                install_migration.run(os.path.abspath(sys.argv[0]), __version__)
+            except Exception:
+                logging.exception("Startup: legacy install migration failed")
+
+        threading.Thread(target=_work, name="legacy-install-migration",
+                         daemon=True).start()
 
     def _sync_autostart_registry(self):
         """

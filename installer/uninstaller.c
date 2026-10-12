@@ -113,21 +113,27 @@ static void delete_installed_files(const wchar_t *install_dir)
 
 /* ── Remove shortcuts ─────────────────────────────────────────────────── */
 
+static void remove_shortcut_pair(const wchar_t *folder)
+{
+    /* Both names: TeleZapp.lnk for copies installed or migrated since the
+     * rename, WinZapp.lnk for any that never were. */
+    static const wchar_t *names[] = { L"TeleZapp.lnk", L"WinZapp.lnk" };
+    for (int i = 0; i < 2; i++) {
+        wchar_t link[MAX_PATH];
+        swprintf(link, MAX_PATH, L"%s\\%s", folder, names[i]);
+        DeleteFileW(link);
+    }
+}
+
 static void remove_shortcuts(void)
 {
     wchar_t path[MAX_PATH];
 
-    if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_DESKTOPDIRECTORY, NULL, 0, path))) {
-        wchar_t link[MAX_PATH];
-        swprintf(link, MAX_PATH, L"%s\\WinZapp.lnk", path);
-        DeleteFileW(link);
-    }
+    if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_DESKTOPDIRECTORY, NULL, 0, path)))
+        remove_shortcut_pair(path);
 
-    if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_COMMON_PROGRAMS, NULL, 0, path))) {
-        wchar_t link[MAX_PATH];
-        swprintf(link, MAX_PATH, L"%s\\WinZapp.lnk", path);
-        DeleteFileW(link);
-    }
+    if (SUCCEEDED(SHGetFolderPathW(NULL, CSIDL_COMMON_PROGRAMS, NULL, 0, path)))
+        remove_shortcut_pair(path);
 }
 
 /* ── Remove registry entry ────────────────────────────────────────────── */
@@ -282,9 +288,9 @@ static INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
     case WM_INITDIALOG:
         if (!get_install_dir(g_install_dir, MAX_PATH)) {
             MessageBoxW(hDlg,
-                L"Não foi possível encontrar o diretório de instalação do WinZapp.\n"
+                L"Não foi possível encontrar o diretório de instalação do TeleZapp.\n"
                 L"O programa pode já ter sido desinstalado.",
-                L"WinZapp", MB_OK | MB_ICONWARNING);
+                L"TeleZapp", MB_OK | MB_ICONWARNING);
             EndDialog(hDlg, IDABORT);
             return TRUE;
         }
@@ -303,7 +309,7 @@ static INT_PTR CALLBACK DlgProc(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lPara
             schedule_self_delete(g_uninstall_exe, g_install_dir);
 
             MessageBoxW(hDlg,
-                L"WinZapp foi desinstalado com sucesso.",
+                L"TeleZapp foi desinstalado com sucesso.",
                 L"Desinstalação concluída", MB_OK | MB_ICONINFORMATION);
             EndDialog(hDlg, IDOK);
             return TRUE;

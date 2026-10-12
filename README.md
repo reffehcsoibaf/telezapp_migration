@@ -49,8 +49,8 @@ WhatsApp uses several different identifier formats for the same contact (`@s.wha
 
 ```powershell
 # 1. Clone the repository
-git clone https://github.com/gabrielhhaber/WinZapp_Python.git
-cd WinZapp_Python
+git clone https://github.com/reffehcsoibaf/telezapp.git
+cd telezapp
 
 # 2. Create and activate a virtual environment
 python -m venv venv

@@ -70,6 +70,29 @@ git push origin main
    `WinZappInstaller.exe`, `WinZapp.zip`, `SHA256SUMS.txt`, `SHA256SUMS.txt.sig`.
 6. Clique **Publish release**.
 
+## Mudança de repositório (WinZapp → TeleZapp)
+
+A versão que passa a apontar as atualizações para `reffehcsoibaf/telezapp`
+(`client/branding.py`, `GITHUB_REPO_DEFAULT`) segue uma ordem própria, porque
+quem já está instalado só consulta o repositório **antigo**:
+
+1. Crie o repositório novo e copie o histórico **com as tags** (por exemplo,
+   `git clone --mirror` do antigo e `git push --mirror` para o novo). Sem as
+   tags, a janela de novidades das versões antigas fica vazia: o changelog é
+   buscado por tag no repositório.
+2. Publique esta versão **no repositório novo** (mesmos arquivos, mesma tag).
+   Ele precisa ter pelo menos uma release antes de alguém instalar esta
+   versão: um repositório sem nenhuma release faz a checagem de atualização
+   falhar em vez de dizer "você já está na versão mais recente".
+3. Publique esta mesma versão **no repositório antigo**. É dela que as cópias
+   instaladas (1.1.5.2 → 2026.10.11.0 → esta) vão baixar. A partir da
+   instalação, passam a consultar o repositório novo.
+4. Mantenha o repositório antigo no ar; ele só recebe essa última release.
+   Daí em diante, todas as releases saem só no repositório novo.
+
+Os nomes `WinZapp.zip`, `WinZappInstaller.exe` e `WinZapp.exe` continuam como
+estão: cópias já instaladas procuram esses nomes ao atualizar.
+
 ## Se algo der errado
 
 Roda o comando que falhou salvando a saída, e me manda o arquivo:

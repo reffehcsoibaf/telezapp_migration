@@ -1,6 +1,6 @@
 V2026.10.11.1
 
-Esta versão torna a atualização do WPPConnect mais rápida na etapa de instalar as dependências e passa a apagar os ficheiros temporários que as atualizações deixavam para trás.
+Esta versão conclui a troca do nome WinZapp por TeleZapp (atalhos, instalador e lista de aplicações instaladas), passa a procurar as atualizações no repositório próprio do TeleZapp, torna a atualização do WPPConnect mais rápida na etapa de instalar as dependências e apaga os ficheiros temporários que as atualizações deixavam para trás.
 
 MELHORIAS
 
@@ -9,6 +9,14 @@ MELHORIAS
 - O TeleZapp passa a usar uma cache de instalação própria, e a pasta npm-cache do Windows deixa de crescer a cada atualização. A cache do TeleZapp fica guardada para acelerar as próximas atualizações.
 
 - A versão de base do WPPConnect passa a ser a 2.10.48 (antes, 2.10.27): é a que as novas instalações e reinstalações usam e a que o verificador de atualização compara.
+
+- O atalho do programa no ambiente de trabalho e no menu Iniciar passa a chamar-se TeleZapp, em vez de WinZapp. Quem já tinha o programa instalado tem o atalho renomeado automaticamente da primeira vez que abrir esta versão.
+
+- O nome TeleZapp passa também a aparecer na lista de aplicações instaladas do Windows (com a versão correta) e no item de arranque automático. O arranque automático continua ligado para quem já o usava.
+
+- O instalador e o desinstalador passam a apresentar-se como TeleZapp, e a pasta sugerida numa nova instalação passa a ser TeleZapp. Quem já tem o programa instalado continua na pasta atual, e executar o instalador de novo sugere essa mesma pasta.
+
+- A partir desta versão, o programa procura as atualizações no repositório próprio do TeleZapp. Não precisa de fazer nada.
 
 CORREÇÕES
 

@@ -8,6 +8,8 @@ MELHORIAS
 
 - O TeleZapp passa a usar um cache de instalação só dele, e a pasta npm-cache do Windows deixa de crescer a cada atualização. O cache do TeleZapp fica guardado para acelerar as próximas atualizações.
 
+- A versão de base do WPPConnect passa a ser a 2.10.48 (antes, 2.10.27): é a que novas instalações e reinstalações usam e a que o verificador de atualização compara.
+
 CORREÇÕES
 
 - A atualização do programa, pelo menu ou pela janela de oferecimento, deixava uma pasta a mais em %temp% a cada vez. Agora esses arquivos temporários são apagados quando a atualização termina com sucesso ou é cancelada.

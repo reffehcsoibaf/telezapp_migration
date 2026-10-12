@@ -8,6 +8,8 @@ ULEPSZENIA
 
 - TeleZapp używa teraz własnej pamięci podręcznej instalacji, a folder npm-cache systemu Windows nie rośnie już przy każdej aktualizacji. Pamięć podręczna TeleZapp jest zachowywana, aby przyspieszać kolejne aktualizacje.
 
+- Bazową wersją WPPConnect jest teraz 2.10.48 (wcześniej 2.10.27): używają jej nowe instalacje i reinstalacje, a z nią porównuje też sprawdzanie aktualizacji.
+
 POPRAWKI
 
 - Aktualizacja programu z menu lub z okna propozycji aktualizacji za każdym razem zostawiała dodatkowy folder w %temp%. Te pliki tymczasowe są teraz usuwane, gdy aktualizacja zakończy się powodzeniem lub zostanie anulowana.

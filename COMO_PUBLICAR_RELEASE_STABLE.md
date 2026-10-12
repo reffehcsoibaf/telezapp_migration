@@ -85,7 +85,7 @@ quem já está instalado só consulta o repositório **antigo**:
    versão: um repositório sem nenhuma release faz a checagem de atualização
    falhar em vez de dizer "você já está na versão mais recente".
 3. Publique esta mesma versão **no repositório antigo**. É dela que as cópias
-   instaladas (1.1.5.2 → 2026.10.11.0 → esta) vão baixar. A partir da
+   instaladas (1.1.5.2 → 2026.10.11.1 → esta) vão baixar. A partir da
    instalação, passam a consultar o repositório novo.
 4. Mantenha o repositório antigo no ar; ele só recebe essa última release.
    Daí em diante, todas as releases saem só no repositório novo.

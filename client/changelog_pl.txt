@@ -1,14 +1,8 @@
-V2026.10.11.1
+V2026.10.12.0
 
-Ta wersja kończy zmianę nazwy WinZapp na TeleZapp (skróty, instalator i lista zainstalowanych aplikacji), szuka aktualizacji we własnym repozytorium TeleZapp, przyspiesza aktualizację WPPConnect na etapie instalowania zależności i usuwa pliki tymczasowe, które aktualizacje zostawiały po sobie.
+Ta wersja kończy zmianę nazwy WinZapp na TeleZapp (skróty, instalator i lista zainstalowanych aplikacji) i szuka aktualizacji we własnym repozytorium TeleZapp.
 
 ULEPSZENIA
-
-- Aktualizacja WPPConnect jest szybsza na etapie „Instalowanie zależności”: TeleZapp instaluje teraz tylko to, czego serwer potrzebuje do działania, bez pakietów używanych wyłącznie do programowania, i wykorzystuje to, co już pobrano, zamiast pytać internet o każdy pakiet.
-
-- TeleZapp używa teraz własnej pamięci podręcznej instalacji, a folder npm-cache systemu Windows nie rośnie już przy każdej aktualizacji. Pamięć podręczna TeleZapp jest zachowywana, aby przyspieszać kolejne aktualizacje.
-
-- Bazową wersją WPPConnect jest teraz 2.10.48 (wcześniej 2.10.27): używają jej nowe instalacje i reinstalacje, a z nią porównuje też sprawdzanie aktualizacji.
 
 - Skrót programu na pulpicie i w menu Start nazywa się teraz TeleZapp zamiast WinZapp. Jeśli program był już zainstalowany, skrót zostanie automatycznie zmieniony przy pierwszym uruchomieniu tej wersji.
 
@@ -17,6 +11,18 @@ ULEPSZENIA
 - Instalator i program do odinstalowania przedstawiają się teraz jako TeleZapp, a folder proponowany przy nowej instalacji to TeleZapp. Jeśli program jest już zainstalowany, pozostaje w obecnym folderze, a ponowne uruchomienie instalatora proponuje ten sam folder.
 
 - Od tej wersji program szuka aktualizacji we własnym repozytorium TeleZapp. Nie musisz nic robić.
+
+V2026.10.11.1
+
+Ta wersja przyspiesza aktualizację WPPConnect na etapie instalowania zależności i usuwa pliki tymczasowe, które aktualizacje zostawiały po sobie.
+
+ULEPSZENIA
+
+- Aktualizacja WPPConnect jest szybsza na etapie „Instalowanie zależności”: TeleZapp instaluje teraz tylko to, czego serwer potrzebuje do działania, bez pakietów używanych wyłącznie do programowania, i wykorzystuje to, co już pobrano, zamiast pytać internet o każdy pakiet.
+
+- TeleZapp używa teraz własnej pamięci podręcznej instalacji, a folder npm-cache systemu Windows nie rośnie już przy każdej aktualizacji. Pamięć podręczna TeleZapp jest zachowywana, aby przyspieszać kolejne aktualizacje.
+
+- Bazową wersją WPPConnect jest teraz 2.10.48 (wcześniej 2.10.27): używają jej nowe instalacje i reinstalacje, a z nią porównuje też sprawdzanie aktualizacji.
 
 POPRAWKI
 

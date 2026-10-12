@@ -1,14 +1,8 @@
-V2026.10.11.1
+V2026.10.12.0
 
-Esta versão completa a troca do nome WinZapp por TeleZapp (atalhos, instalador e lista de aplicativos instalados), passa a buscar as atualizações no repositório próprio do TeleZapp, deixa a atualização do WPPConnect mais rápida na etapa de instalar as dependências e apaga os arquivos temporários que as atualizações deixavam para trás.
+Esta versão completa a troca do nome WinZapp por TeleZapp (atalhos, instalador e lista de aplicativos instalados) e passa a buscar as atualizações no repositório próprio do TeleZapp.
 
 MELHORIAS
-
-- A atualização do WPPConnect ficou mais rápida na etapa "Instalando dependências": o TeleZapp agora instala só o que o servidor precisa para funcionar, sem os pacotes usados apenas no desenvolvimento, e reaproveita o que já foi baixado em vez de consultar a internet para cada pacote.
-
-- O TeleZapp passa a usar um cache de instalação só dele, e a pasta npm-cache do Windows deixa de crescer a cada atualização. O cache do TeleZapp fica guardado para acelerar as próximas atualizações.
-
-- A versão de base do WPPConnect passa a ser a 2.10.48 (antes, 2.10.27): é a que novas instalações e reinstalações usam e a que o verificador de atualização compara.
 
 - O atalho do programa na área de trabalho e no menu Iniciar passa a se chamar TeleZapp, em vez de WinZapp. Quem já tinha o programa instalado tem o atalho renomeado sozinho na primeira vez que abrir esta versão.
 
@@ -17,6 +11,18 @@ MELHORIAS
 - O instalador e o desinstalador agora se apresentam como TeleZapp, e a pasta sugerida numa instalação nova passa a ser TeleZapp. Quem já tem o programa instalado continua na pasta atual, e rodar o instalador de novo sugere essa mesma pasta.
 
 - A partir desta versão, o programa procura as atualizações no repositório próprio do TeleZapp. Você não precisa fazer nada.
+
+V2026.10.11.1
+
+Esta versão deixa a atualização do WPPConnect mais rápida na etapa de instalar as dependências e passa a apagar os arquivos temporários que as atualizações deixavam para trás.
+
+MELHORIAS
+
+- A atualização do WPPConnect ficou mais rápida na etapa "Instalando dependências": o TeleZapp agora instala só o que o servidor precisa para funcionar, sem os pacotes usados apenas no desenvolvimento, e reaproveita o que já foi baixado em vez de consultar a internet para cada pacote.
+
+- O TeleZapp passa a usar um cache de instalação só dele, e a pasta npm-cache do Windows deixa de crescer a cada atualização. O cache do TeleZapp fica guardado para acelerar as próximas atualizações.
+
+- A versão de base do WPPConnect passa a ser a 2.10.48 (antes, 2.10.27): é a que novas instalações e reinstalações usam e a que o verificador de atualização compara.
 
 CORREÇÕES
 

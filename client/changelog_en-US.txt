@@ -1,14 +1,8 @@
-V2026.10.11.1
+V2026.10.12.0
 
-This release completes the change from the WinZapp name to TeleZapp (shortcuts, installer and the installed-apps list), looks for updates in TeleZapp's own repository, makes the WPPConnect update faster in the dependency-installation step and deletes the temporary files that updates used to leave behind.
+This release completes the change from the WinZapp name to TeleZapp (shortcuts, installer and the installed-apps list) and looks for updates in TeleZapp's own repository.
 
 IMPROVEMENTS
-
-- The WPPConnect update is faster in the "Installing dependencies" step: TeleZapp now installs only what the server needs to run, without the packages used only for development, and reuses what was already downloaded instead of asking the internet for every package.
-
-- TeleZapp now uses its own installation cache, so the Windows npm-cache folder no longer grows with every update. TeleZapp's cache is kept to speed up future updates.
-
-- The base WPPConnect version is now 2.10.48 (it was 2.10.27): it is the one new installs and reinstalls use and the one the update checker compares against.
 
 - The program's shortcut on the desktop and in the Start menu is now called TeleZapp instead of WinZapp. If you already had the program installed, the shortcut is renamed automatically the first time you open this version.
 
@@ -17,6 +11,18 @@ IMPROVEMENTS
 - The installer and uninstaller now present themselves as TeleZapp, and the folder suggested for a new installation is TeleZapp. If you already have the program installed, it stays in its current folder, and running the installer again suggests that same folder.
 
 - From this version on, the program looks for updates in TeleZapp's own repository. You don't need to do anything.
+
+V2026.10.11.1
+
+This release makes the WPPConnect update faster in the dependency-installation step and now deletes the temporary files that updates used to leave behind.
+
+IMPROVEMENTS
+
+- The WPPConnect update is faster in the "Installing dependencies" step: TeleZapp now installs only what the server needs to run, without the packages used only for development, and reuses what was already downloaded instead of asking the internet for every package.
+
+- TeleZapp now uses its own installation cache, so the Windows npm-cache folder no longer grows with every update. TeleZapp's cache is kept to speed up future updates.
+
+- The base WPPConnect version is now 2.10.48 (it was 2.10.27): it is the one new installs and reinstalls use and the one the update checker compares against.
 
 FIXES
 

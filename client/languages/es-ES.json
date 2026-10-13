@@ -769,6 +769,8 @@
   "speech_announce_recording_label": "Anunciar cuando un contacto está grabando un audio en una conversación",
   "speech_announce_conversations_update_start_label": "Anunciar cuando la actualización de conversaciones se haya iniciado",
   "speech_announce_conversations_update_label": "Anunciar cuando la actualización de conversaciones se haya completado",
+  "speech_announce_sync_progress_label": "Anunciar cada pocos segundos el progreso de la sincronización de conversaciones",
+  "speech_announce_media_progress_label": "Anunciar cada pocos segundos el progreso de la descarga de multimedia",
   "speech_speak_active_conv_label": "Hablar mensajes automáticamente en la conversación activa",
   "speech_speak_other_conv_label": "Hablar mensajes automáticamente en otras conversaciones mientras el programa está abierto",
   "speech_silence_while_recording_label": "Silenciar los anuncios de contenido hablado y el botón de enviar mientras se graba un mensaje de voz",

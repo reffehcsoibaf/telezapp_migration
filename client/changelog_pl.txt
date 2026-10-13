@@ -18,6 +18,8 @@ ULEPSZENIA
 
 - Bazową wersją WPPConnect jest teraz 2.10.48 (wcześniej 2.10.27): używają jej nowe instalacje i reinstalacje, a z nią porównuje też sprawdzanie aktualizacji.
 
+- W Ustawienia > Dostępność > Zawartość mówiona dwa nowe pola, domyślnie zaznaczone, osobno włączają i wyłączają odczytywanie postępu: „Ogłaszaj co kilka sekund postęp synchronizacji czatów” i „Ogłaszaj co kilka sekund postęp pobierania multimediów”. Po odznaczeniu postęp nadal jest widoczny na pasku stanu.
+
 POPRAWKI
 
 - Mówione komunikaty o postępie synchronizacji („Synchronizowanie czatów: X z Y”) i pobierania multimediów („Pobieranie multimediów: X z Y przetworzonych”) respektują teraz opcję „Anonsuj synchronizację, pobieranie multimediów i automatyczny tryb offline” w Ustawienia > Ogólne: gdy jest odznaczona, postęp pojawia się tylko na pasku stanu i nie jest odczytywany. Nie są też odczytywane, gdy TeleZapp uruchamia się w tle, ani podczas automatycznego sprawdzania wykonywanego co minutę.

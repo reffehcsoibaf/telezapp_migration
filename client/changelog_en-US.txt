@@ -18,6 +18,8 @@ IMPROVEMENTS
 
 - The base WPPConnect version is now 2.10.48 (it was 2.10.27): it is the one new installs and reinstalls use and the one the update checker compares against.
 
+- In Settings > Accessibility > Spoken content, two new boxes, checked by default, turn the spoken progress updates on and off separately: "Announce chat sync progress every few seconds" and "Announce media download progress every few seconds". Unchecked, the progress still appears in the status bar.
+
 FIXES
 
 - The spoken progress updates for chat sync ("Syncing chats: X of Y") and media downloads ("Downloading media: X of Y processed") now follow the "Announce sync, media downloads and automatic offline mode" option in Settings > General: with it unchecked, progress only appears in the status bar and is not spoken. They are also no longer spoken when TeleZapp starts in the background or during the automatic check that runs every minute.

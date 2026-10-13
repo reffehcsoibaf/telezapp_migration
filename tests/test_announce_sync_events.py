@@ -71,21 +71,21 @@ class _ProgressStub(_Stub):
 
 def test_progress_is_spoken_and_shown_by_default():
     stub = _ProgressStub({})
-    stub._report_sync_progress("Sincronizando conversas: 3 de 10")
+    stub._report_sync_progress("Sincronizando conversas: 3 de 10", "announce_sync_progress")
     assert stub.status == ["Sincronizando conversas: 3 de 10"]
     assert stub.spoken == ["Sincronizando conversas: 3 de 10"]
 
 
 def test_progress_is_not_spoken_when_announcements_are_off():
     stub = _ProgressStub({"general": {"announce_sync_events": False}})
-    stub._report_sync_progress("Baixando mídia: 5 de 40 processadas (2 baixadas)")
+    stub._report_sync_progress("Baixando mídia: 5 de 40 processadas (2 baixadas)", "announce_media_progress")
     assert stub.status == ["Baixando mídia: 5 de 40 processadas (2 baixadas)"]
     assert stub.spoken == []
 
 
 def test_progress_is_not_spoken_in_background_mode():
     stub = _ProgressStub({}, background_mode=True)
-    stub._report_sync_progress("Sincronizando conversas: 1 de 2")
+    stub._report_sync_progress("Sincronizando conversas: 1 de 2", "announce_sync_progress")
     assert stub.status == ["Sincronizando conversas: 1 de 2"]
     assert stub.spoken == []
 
@@ -96,5 +96,33 @@ def test_sync_sweeps_speak_progress_only_through_the_gated_helper():
     from pathlib import Path
 
     source = (Path(__file__).resolve().parents[1] / "client" / "main.py").read_text(encoding="utf-8")
-    assert "wx.CallAfter(self.output, progress_text)" not in source
-    assert source.count("wx.CallAfter(self._report_sync_progress, progress_text)") == 2
+    flat = "".join(source.split())
+    assert "wx.CallAfter(self.output,progress_text)" not in flat
+    assert flat.count('wx.CallAfter(self._report_sync_progress,progress_text,"announce_sync_progress")') == 1
+    assert flat.count('wx.CallAfter(self._report_sync_progress,progress_text,"announce_media_progress")') == 1
+
+
+# ── Configurações > Acessibilidade > Conteúdo falado: one box per sweep ───────
+
+
+@pytest.mark.parametrize("key", ["announce_sync_progress", "announce_media_progress"])
+def test_each_spoken_content_box_silences_only_its_own_progress(key):
+    other = ({"announce_sync_progress", "announce_media_progress"} - {key}).pop()
+    stub = _ProgressStub({"speech_content": {key: False}})
+    stub._report_sync_progress("muted", key)
+    stub._report_sync_progress("spoken", other)
+    assert stub.status == ["muted", "spoken"]
+    assert stub.spoken == ["spoken"]
+
+
+def test_both_boxes_default_to_on():
+    import json
+    from pathlib import Path
+
+    from core.utils import DEFAULT_SETTINGS
+
+    defaults = json.loads((Path(__file__).resolve().parents[1] / "client" / "data"
+                           / "settings_default.json").read_text(encoding="utf-8"))
+    for key in ("announce_sync_progress", "announce_media_progress"):
+        assert defaults["speech_content"][key] is True
+        assert DEFAULT_SETTINGS["speech_content"][key] is True

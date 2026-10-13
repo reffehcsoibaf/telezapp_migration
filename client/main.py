@@ -3921,20 +3921,23 @@ class MainWindow(wx.Frame):
         """
         return bool(self.settings.get("general", {}).get("announce_sync_events", True))
 
-    def _report_sync_progress(self, text: str) -> None:
+    def _report_sync_progress(self, text: str, speech_key: str) -> None:
         """Show a periodic sync/media-download progress line and speak it.
 
         Called (via wx.CallAfter, so on the main thread) every ~5 s by the
         chat-sync and media-download sweeps. The status bar always gets the
-        text; speech follows the same rules as every other sync announcement:
-        silent in background mode and when Settings > Geral > "Anunciar
-        sincronização, download de mídias e modo offline automático" is
-        unchecked. Before this, the progress lines were the only sync
-        announcements that ignored that checkbox.
+        text. Speech needs all three: not in background mode; Settings > Geral
+        > "Anunciar sincronização, download de mídias e modo offline
+        automático" (master switch of every sync announcement); and the
+        sweep's own box in Configurações > Acessibilidade > Conteúdo falado —
+        ``speech_key`` is "announce_sync_progress" or "announce_media_progress".
         """
         self._set_status(text)
-        if not self.background_mode and self._announce_sync_events_enabled():
-            self.output(text)
+        if self.background_mode or not self._announce_sync_events_enabled():
+            return
+        if not self.settings.get("speech_content", {}).get(speech_key, True):
+            return
+        self.output(text)
 
     def _search_normalization_mode(self) -> str:
         """Settings > Geral > "Normalização Unicode nas pesquisas": one of
@@ -19940,7 +19943,8 @@ class MainWindow(wx.Frame):
                     progress_text = self.i18n.t("sync_chats_progress_msg").format(
                         done=completed_count, total=total_chats
                     )
-                    wx.CallAfter(self._report_sync_progress, progress_text)
+                    wx.CallAfter(self._report_sync_progress, progress_text,
+                                 "announce_sync_progress")
                     last_spoken_ts = now
 
         # Keep a durable retry latch for message I/O failures. list-chats may
@@ -21527,7 +21531,8 @@ class MainWindow(wx.Frame):
                     progress_text = self.i18n.t("sync_media_progress_msg").format(
                         done=processed, total=total_tasks, downloaded=downloaded
                     )
-                    wx.CallAfter(self._report_sync_progress, progress_text)
+                    wx.CallAfter(self._report_sync_progress, progress_text,
+                                 "announce_media_progress")
                     last_spoken_ts = now
 
         # Persist the set of expired IDs accumulated during this sync run.

@@ -18,6 +18,8 @@ MEJORAS
 
 - La versión base de WPPConnect pasa a ser la 2.10.48 (antes, la 2.10.27): es la que usan las instalaciones y reinstalaciones nuevas y con la que compara el verificador de actualizaciones.
 
+- En Configuración > Accesibilidad > Contenido hablado, dos casillas nuevas, marcadas por defecto, activan y desactivan por separado los avisos hablados de progreso: "Anunciar cada pocos segundos el progreso de la sincronización de conversaciones" y "Anunciar cada pocos segundos el progreso de la descarga de multimedia". Desmarcadas, el progreso sigue apareciendo en la barra de estado.
+
 CORRECCIONES
 
 - Los avisos hablados de progreso de la sincronización ("Sincronizando conversaciones: X de Y") y de la descarga de multimedia ("Descargando multimedia: X de Y procesadas") ahora respetan la opción "Anunciar sincronización, descarga de medios y modo sin conexión automático", en Configuración > General: si está desmarcada, el progreso aparece solo en la barra de estado, sin anunciarse. Tampoco se anuncian cuando TeleZapp se inicia en segundo plano ni durante la comprobación automática que se ejecuta cada minuto.

@@ -244,6 +244,7 @@
       <div class="col-card"><h4>📇 Index</h4>First, it builds the list of chats and messages — this is fast, because no media (photo, audio, video, sticker, document) is downloaded automatically at this point. This keeps the first sync light and quick.</div>
       <div class="col-card"><h4>🖼️ Media</h4>Then, if automatic download is enabled (Settings &gt; Storage), it fetches the most recent media a bit at a time, in the background, periodically announcing how many have been processed.</div>
     </div>
+    <p>While chats sync, the status bar shows and the screen reader speaks, roughly every 5 seconds, how many are done ("Syncing chats: 12 of 80"); media downloads work the same way ("Downloading media: 30 of 120 processed (8 downloaded)"). "Processed" also counts media that is skipped (already downloaded, past the day or size limit, or expired on WhatsApp), so it can be much higher than the number downloaded. To keep TeleZapp from speaking this progress, uncheck <strong>Announce sync, media downloads and automatic offline mode</strong> in Settings &gt; General: the status bar still shows the numbers.</p>
     <div class="callout tip">
       <div class="callout-title">💡 Media on demand</div>
       Even with automatic download off, opening a media item manually (photo, audio, etc.) always downloads it on the spot.

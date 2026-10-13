@@ -20,6 +20,8 @@ ULEPSZENIA
 
 POPRAWKI
 
+- Mówione komunikaty o postępie synchronizacji („Synchronizowanie czatów: X z Y”) i pobierania multimediów („Pobieranie multimediów: X z Y przetworzonych”) respektują teraz opcję „Anonsuj synchronizację, pobieranie multimediów i automatyczny tryb offline” w Ustawienia > Ogólne: gdy jest odznaczona, postęp pojawia się tylko na pasku stanu i nie jest odczytywany. Nie są też odczytywane, gdy TeleZapp uruchamia się w tle, ani podczas automatycznego sprawdzania wykonywanego co minutę.
+
 - Aktualizacja programu z menu lub z okna propozycji aktualizacji za każdym razem zostawiała dodatkowy folder w %temp%. Te pliki tymczasowe są teraz usuwane, gdy aktualizacja zakończy się powodzeniem lub zostanie anulowana.
 
 V2026.10.11.0

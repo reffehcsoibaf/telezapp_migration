@@ -20,6 +20,8 @@ IMPROVEMENTS
 
 FIXES
 
+- The spoken progress updates for chat sync ("Syncing chats: X of Y") and media downloads ("Downloading media: X of Y processed") now follow the "Announce sync, media downloads and automatic offline mode" option in Settings > General: with it unchecked, progress only appears in the status bar and is not spoken. They are also no longer spoken when TeleZapp starts in the background or during the automatic check that runs every minute.
+
 - Updating the program, from the menu or from the update prompt, left one extra folder in %temp% every time. These temporary files are now deleted when the update finishes successfully or is canceled.
 
 V2026.10.11.0

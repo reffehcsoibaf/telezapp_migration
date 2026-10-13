@@ -3921,6 +3921,21 @@ class MainWindow(wx.Frame):
         """
         return bool(self.settings.get("general", {}).get("announce_sync_events", True))
 
+    def _report_sync_progress(self, text: str) -> None:
+        """Show a periodic sync/media-download progress line and speak it.
+
+        Called (via wx.CallAfter, so on the main thread) every ~5 s by the
+        chat-sync and media-download sweeps. The status bar always gets the
+        text; speech follows the same rules as every other sync announcement:
+        silent in background mode and when Settings > Geral > "Anunciar
+        sincronização, download de mídias e modo offline automático" is
+        unchecked. Before this, the progress lines were the only sync
+        announcements that ignored that checkbox.
+        """
+        self._set_status(text)
+        if not self.background_mode and self._announce_sync_events_enabled():
+            self.output(text)
+
     def _search_normalization_mode(self) -> str:
         """Settings > Geral > "Normalização Unicode nas pesquisas": one of
         "off" (default), "nfd" or "nfkd" — see normalize_for_search().
@@ -17970,11 +17985,11 @@ class MainWindow(wx.Frame):
                             )
                             if full_targets:
                                 message_failures.update(
-                                    self.sync_remote_chats(full_targets, incremental=False) or set()
+                                    self.sync_remote_chats(full_targets, incremental=False, quiet=True) or set()
                                 )
                             if incremental_targets:
                                 message_failures.update(
-                                    self.sync_remote_chats(incremental_targets, incremental=True) or set()
+                                    self.sync_remote_chats(incremental_targets, incremental=True, quiet=True) or set()
                                 )
 
                             # A missed WebSocket media message recovered by this
@@ -17993,7 +18008,7 @@ class MainWindow(wx.Frame):
                                         "auto_download_media", True)
                                     and not getattr(self, "_media_sync_running", False)
                                     and not getattr(self, "_history_still_landing", False)):
-                                self.sync_media_for_all_chats(changed_jids)
+                                self.sync_media_for_all_chats(changed_jids, quiet=True)
 
                         if not message_failures:
                             # Persist unread/pin/archive/activity metadata only
@@ -19841,7 +19856,11 @@ class MainWindow(wx.Frame):
         except Exception as exc:
             logging.warning("[sync] failed to persist chat_verified_at: %s", exc)
 
-    def sync_remote_chats(self, target_chats=None, incremental: bool = False):
+    def sync_remote_chats(self, target_chats=None, incremental: bool = False,
+                          quiet: bool = False):
+        # quiet: no periodic "Sincronizando conversas: X de Y". The
+        # once-a-minute safety poll (start_periodic_contacts_sync) passes it:
+        # a background check must never sound like a sync.
         chats = list(target_chats) if target_chats is not None else list(self.chats.values())
         if not chats:
             return set()
@@ -19917,12 +19936,11 @@ class MainWindow(wx.Frame):
                 # follow.
                 completed_count += 1
                 now = time.time()
-                if now - last_spoken_ts >= 5:
+                if not quiet and now - last_spoken_ts >= 5:
                     progress_text = self.i18n.t("sync_chats_progress_msg").format(
                         done=completed_count, total=total_chats
                     )
-                    wx.CallAfter(self._set_status, progress_text)
-                    wx.CallAfter(self.output, progress_text)
+                    wx.CallAfter(self._report_sync_progress, progress_text)
                     last_spoken_ts = now
 
         # Keep a durable retry latch for message I/O failures. list-chats may
@@ -21450,7 +21468,7 @@ class MainWindow(wx.Frame):
         threading.Thread(
             target=_run, daemon=True, name="deferred-media-sync").start()
 
-    def sync_media_for_all_chats(self, jids=None) -> int:
+    def sync_media_for_all_chats(self, jids=None, quiet: bool = False) -> int:
         """Download not-yet-stored media, optionally limited to changed chats.
 
         Returns the number of files **actually downloaded**, not the number of
@@ -21505,12 +21523,11 @@ class MainWindow(wx.Frame):
                 # moving right along through every candidate.
                 processed += 1
                 now = time.time()
-                if now - last_spoken_ts >= 5:
+                if not quiet and now - last_spoken_ts >= 5:
                     progress_text = self.i18n.t("sync_media_progress_msg").format(
                         done=processed, total=total_tasks, downloaded=downloaded
                     )
-                    wx.CallAfter(self._set_status, progress_text)
-                    wx.CallAfter(self.output, progress_text)
+                    wx.CallAfter(self._report_sync_progress, progress_text)
                     last_spoken_ts = now
 
         # Persist the set of expired IDs accumulated during this sync run.

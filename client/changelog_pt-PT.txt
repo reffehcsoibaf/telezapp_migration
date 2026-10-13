@@ -20,6 +20,8 @@ MELHORIAS
 
 CORREÇÕES
 
+- Os avisos falados de progresso da sincronização ("A sincronizar conversas: X de Y") e da transferência de multimédia ("A transferir multimédia: X de Y processadas") passam a respeitar a opção "Anunciar sincronização, descarregamento de mídias e modo offline automático", em Definições > Geral: com ela desmarcada, o progresso aparece só na barra de estado, sem ser dito. Também deixam de ser ditos quando o TeleZapp é iniciado em segundo plano e durante a verificação automática que corre a cada minuto.
+
 - A atualização do programa, pelo menu ou pela janela de oferta, deixava uma pasta a mais em %temp% de cada vez. Agora esses ficheiros temporários são apagados quando a atualização termina com sucesso ou é cancelada.
 
 V2026.10.11.0
